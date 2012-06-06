@@ -8,7 +8,8 @@
 # This file is licensed under AGPLv3
 #
 # Requires libtidy
-# Usage: call login(u, p) once, then sendusermsg(u, m) as many times as needed
+# Usage: call login(u, p) once, then sendusermsg(u, t, m) as many times
+# as needed
 
 import psycopg2, sys, os, xml.etree.cElementTree as ElementTree, \
 	httplib, tidy, StringIO, urllib
@@ -98,7 +99,7 @@ def login(user, passwd):
 	if r.status != 200:
 		raise Exception('OSM login POST status ' + str(r.status))
 
-def sendusermsg(user, msg):
+def sendusermsg(user, msgtitle, msg):
 	user = urllib.quote(user)
 	r = request('GET', None,
 		'http://www.openstreetmap.org/message/new/' + user)
@@ -110,7 +111,7 @@ def sendusermsg(user, msg):
 	for field in ElementTree.parse(r).getiterator(inptag):
 		if 'name' in field.attrib and 'value' in field.attrib:
 			fields[field.attrib['name']] = field.attrib['value']
-	fields['message[title]'] = 'Powitanie / Welcome message'
+	fields['message[title]'] = msgtitle
 	fields['message[body]'] = msg
 	for field in fields:
 		fields[field] = fields[field].encode('utf-8')
