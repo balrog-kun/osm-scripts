@@ -53,7 +53,11 @@ def request(method, body, url):
 		hmc.request(method, '/' + path, body, headers)
 		try:
 			r = hmc.getresponse()
-		except httplib.ResponseNotReady, httplib.BadStatusLine:
+		except httplib.ResponseNotReady:
+			reconnect()
+			hmc.request(method, '/' + path, body, headers)
+			r = hmc.getresponse()
+		except httplib.BadStatusLine:
 			reconnect()
 			hmc.request(method, '/' + path, body, headers)
 			r = hmc.getresponse()
