@@ -9,7 +9,7 @@
 #
 # Requires libtidy
 # Usage: call login(u, p) once, then sendusermsg(u, t, m) as many times
-# as needed
+# as needed, but not too many.
 
 import psycopg2, sys, os, xml.etree.cElementTree as ElementTree, \
 	httplib, tidy, StringIO, urllib
@@ -100,6 +100,7 @@ def login(user, passwd):
 		raise Exception('OSM login POST status ' + str(r.status))
 
 def sendusermsg(user, msgtitle, msg):
+	global ref
 	user = urllib.quote(user)
 	r = request('GET', None,
 		'http://www.openstreetmap.org/message/new/' + user)
@@ -120,3 +121,14 @@ def sendusermsg(user, msgtitle, msg):
 		'http://www.openstreetmap.org/message/new/' + user)
 	if r.status != 200:
 		raise Exception('OSM POST status ' + str(r.status))
+	# The server says this when we send too many messages:
+	# "You have sent a lot of messages recently.
+	# Please wait a while before sending any more."
+	# Fair enough, however this may be local specific, so let's
+	# try grepping for id="error" instead
+	if r.read().find('id="error"') > -1:
+		raise Exception('You sent too many messages, throttled')
+	if ref[-6:] != '/inbox':
+		raise Exception('Did not get redirected to our Inbox, ' +
+				'something likely went wrong and you ' +
+				'need to retry.')
