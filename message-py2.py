@@ -53,7 +53,7 @@ def request(method, body, url):
 		hmc.request(method, '/' + path, body, headers)
 		try:
 			r = hmc.getresponse()
-		except httplib.ResponseNotReady:
+		except httplib.ResponseNotReady, httplib.BadStatusLine:
 			reconnect()
 			hmc.request(method, '/' + path, body, headers)
 			r = hmc.getresponse()
@@ -100,7 +100,7 @@ def login(user, passwd):
 		raise Exception('OSM login POST status ' + str(r.status))
 
 def sendusermsg(user, msgtitle, msg):
-	global ref
+	global ref, inptag
 	user = urllib.quote(user)
 	r = request('GET', None,
 		'http://www.openstreetmap.org/message/new/' + user)
