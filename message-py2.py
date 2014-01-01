@@ -81,15 +81,18 @@ def request(method, body, url):
 			body = None
 		url = loc
 
-inptag = '{http://www.w3.org/1999/xhtml}input'
+inptag = 'input'
+# Before Nov 29, 2013:
+#inptag = '{http://www.w3.org/1999/xhtml}input'
 
 def login(user, passwd):
 	r = request('GET', None, 'https://www.openstreetmap.org/login')
 	if r.status != 200:
 		raise Exception('OSM login status ' + str(r.status))
 	fields = {}
-	r = StringIO.StringIO(str(tidy.parseString(r.read(), output_xml=1,
-		preserve_entities=0, numeric_entities=1, add_xml_decl=1)))
+	# Before Nov 29, 2013:
+	#r = StringIO.StringIO(str(tidy.parseString(r.read(), output_xml=1,
+	#	preserve_entities=0, numeric_entities=1, add_xml_decl=1)))
 	for field in ElementTree.parse(r).getiterator(inptag):
 		if 'name' in field.attrib and 'value' in field.attrib:
 			fields[field.attrib['name']] = field.attrib['value']
@@ -111,8 +114,15 @@ def sendusermsg(user, msgtitle, msg):
 	if r.status != 200:
 		raise Exception('OSM status ' + str(r.status))
 	fields = {}
-	r = StringIO.StringIO(str(tidy.parseString(r.read(), output_xml=1,
-		preserve_entities=0, numeric_entities=1, add_xml_decl=1)))
+
+	# Before Nov 29, 2013:
+	#r = StringIO.StringIO(str(tidy.parseString(r.read(), output_xml=1,
+	#	preserve_entities=0, numeric_entities=1, add_xml_decl=1)))
+
+	# After Nov 29, 2013 the document is almost compliant:
+	xhtml = r.read().replace('<br>', '<br />')
+	r = StringIO.StringIO(xhtml)
+
 	for field in ElementTree.parse(r).getiterator(inptag):
 		if 'name' in field.attrib and 'value' in field.attrib:
 			fields[field.attrib['name']] = field.attrib['value']
