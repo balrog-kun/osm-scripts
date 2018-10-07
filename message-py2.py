@@ -122,8 +122,7 @@ def sendusermsg(user, msgtitle, msg):
 	for field in fields:
 		fields[field] = fields[field].encode('utf-8')
 	params = urllib.urlencode(fields)
-	r = request('POST', params,
-		'http://www.openstreetmap.org/message/new/' + user)
+	r = request('POST', params, 'http://www.openstreetmap.org/messages')
 	if r.status != 200:
 		raise Exception('OSM POST status ' + str(r.status))
 	# The server says this when we send too many messages:
